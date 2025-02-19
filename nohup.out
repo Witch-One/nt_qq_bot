@@ -1,0 +1,679 @@
+warning: unused import: `base64::encode`
+ --> plugins/base/src/lib.rs:1:5
+  |
+1 | use base64::encode;
+  |     ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `std::fs`
+ --> plugins/base/src/lib.rs:5:5
+  |
+5 | use std::fs;
+  |     ^^^^^^^
+
+warning: unused import: `kovi::tokio`
+ --> plugins/taro/src/lib.rs:2:5
+  |
+2 | use kovi::tokio;
+  |     ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `kovi::tokio::sync::Mutex`
+ --> plugins/taro/src/lib.rs:3:5
+  |
+3 | use kovi::tokio::sync::Mutex; // 使用 tokio 的 Mutex
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::sync::Arc`
+ --> plugins/taro/src/lib.rs:9:5
+  |
+9 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+
+warning: use of deprecated function `rand::thread_rng`: renamed to `rng`
+   --> plugins/taro/src/lib.rs:218:41
+    |
+218 |                     let mut rng = rand::thread_rng();
+    |                                         ^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated function `rand::thread_rng`: renamed to `rng`
+   --> plugins/taro/src/lib.rs:181:29
+    |
+181 |         let mut rng = rand::thread_rng();
+    |                             ^^^^^^^^^^
+
+warning: use of deprecated method `rand::Rng::gen_bool`: Renamed to `random_bool`
+   --> plugins/taro/src/lib.rs:219:42
+    |
+219 |                     let is_upright = rng.gen_bool(0.5);
+    |                                          ^^^^^^^^
+
+warning: unused variable: `i`
+   --> plugins/taro/src/lib.rs:216:21
+    |
+216 |                 for i in 0..3 {
+    |                     ^ help: if this is intentional, prefix it with an underscore: `_i`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: use of deprecated method `rand::Rng::gen_range`: Renamed to `random_range`
+   --> plugins/taro/src/lib.rs:183:32
+    |
+183 |         let random_index = rng.gen_range(0..tarot_cards.len());
+    |                                ^^^^^^^^^
+
+warning: unused import: `std::error::Error`
+ --> plugins/taro/src/lib.rs:8:5
+  |
+8 | use std::error::Error;
+  |     ^^^^^^^^^^^^^^^^^
+
+warning: `base` (lib) generated 2 warnings (run `cargo fix --lib -p base` to apply 2 suggestions)
+warning: `taro` (lib) generated 9 warnings (run `cargo fix --lib -p taro` to apply 3 suggestions)
+warning: unused import: `kovi::tokio`
+ --> plugins/deepseek/src/lib.rs:3:5
+  |
+3 | use kovi::tokio;
+  |     ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `std::error::Error`
+ --> plugins/deepseek/src/lib.rs:8:5
+  |
+8 | use std::error::Error;
+  |     ^^^^^^^^^^^^^^^^^
+
+warning: `deepseek` (lib) generated 2 warnings (run `cargo fix --lib -p deepseek` to apply 2 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.39s
+     Running `target/debug/my-kovi-bot`
+[02-14 11:02:27] Mounting plugin: taro
+[02-14 11:02:27] Mounting plugin: deepseek
+[02-14 11:02:27] Bot connection successful，Nickname:"Witch_One",ID:3939271104
+[02-14 11:02:56] [group 852296265 女巫盲毒预言家 1335515386]: [at]  hello
+"[at]  hello"
+[Message { role: "system", content: "你正在扮演一个真实的聊天对象,我会将消息以`[name]:msg`的格式发送给你,请鉴别不同人的消息记录的同时,综合群聊上下文回答对方问题。用中文回答,注意只回答内容,以纯字符串形式回复,不要带任何格式。" }, Message { role: "user", content: "[女巫盲毒预言家]:hello" }]
+false
+Response: {"id":"01950268c9b8e71ccdee51fd93c01a72","object":"chat.completion","created":1739502176,"model":"deepseek-ai/DeepSeek-V3","choices":[{"index":0,"message":{"role":"assistant","content":"你好！有什么我可以帮你的吗？"},"finish_reason":"stop"}],"usage":{"prompt_tokens":71,"completion_tokens":8,"total_tokens":79},"system_fingerprint":""}
+[02-14 11:02:57] [reply] [to group 852296265 女巫盲毒预言家 1335515386]: [reply][at]你好！有什么我可以帮你的吗？
+warning: unused import: `base64::encode`
+ --> plugins/base/src/lib.rs:1:5
+  |
+1 | use base64::encode;
+  |     ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `std::fs`
+ --> plugins/base/src/lib.rs:5:5
+  |
+5 | use std::fs;
+  |     ^^^^^^^
+
+warning: unused import: `kovi::tokio`
+ --> plugins/taro/src/lib.rs:2:5
+  |
+2 | use kovi::tokio;
+  |     ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `kovi::tokio::sync::Mutex`
+ --> plugins/taro/src/lib.rs:3:5
+  |
+3 | use kovi::tokio::sync::Mutex; // 使用 tokio 的 Mutex
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::sync::Arc`
+ --> plugins/taro/src/lib.rs:9:5
+  |
+9 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+
+warning: use of deprecated function `rand::thread_rng`: renamed to `rng`
+   --> plugins/taro/src/lib.rs:221:41
+    |
+221 |                     let mut rng = rand::thread_rng();
+    |                                         ^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated function `rand::thread_rng`: renamed to `rng`
+   --> plugins/taro/src/lib.rs:181:29
+    |
+181 |         let mut rng = rand::thread_rng();
+    |                             ^^^^^^^^^^
+
+warning: use of deprecated method `rand::Rng::gen_bool`: Renamed to `random_bool`
+   --> plugins/taro/src/lib.rs:222:42
+    |
+222 |                     let is_upright = rng.gen_bool(0.5);
+    |                                          ^^^^^^^^
+
+warning: unused variable: `i`
+   --> plugins/taro/src/lib.rs:219:21
+    |
+219 |                 for i in 0..3 {
+    |                     ^ help: if this is intentional, prefix it with an underscore: `_i`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: use of deprecated method `rand::Rng::gen_range`: Renamed to `random_range`
+   --> plugins/taro/src/lib.rs:183:32
+    |
+183 | ...   let random_index = rng.gen_range(0..tarot_cards....
+    |                              ^^^^^^^^^
+
+warning: unused import: `std::error::Error`
+ --> plugins/taro/src/lib.rs:8:5
+  |
+8 | use std::error::Error;
+  |     ^^^^^^^^^^^^^^^^^
+
+warning: `base` (lib) generated 2 warnings (run `cargo fix --lib -p base` to apply 2 suggestions)
+warning: `taro` (lib) generated 9 warnings (run `cargo fix --lib -p taro` to apply 3 suggestions)
+warning: unused import: `kovi::tokio`
+ --> plugins/deepseek/src/lib.rs:3:5
+  |
+3 | use kovi::tokio;
+  |     ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `std::error::Error`
+ --> plugins/deepseek/src/lib.rs:8:5
+  |
+8 | use std::error::Error;
+  |     ^^^^^^^^^^^^^^^^^
+
+warning: `deepseek` (lib) generated 2 warnings (run `cargo fix --lib -p deepseek` to apply 2 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.40s
+     Running `target/debug/my-kovi-bot`
+[02-17 15:51:15] Mounting plugin: taro
+[02-17 15:51:15] Mounting plugin: deepseek
+[02-17 15:51:15] Bot connection successful，Nickname:"Witch_One",ID:3939271104
+[02-17 15:53:57] [group 249065204 女巫盲毒预言家 1335515386]: [at] oi
+"[at] oi"
+[Message { role: "system", content: "你正在扮演一个真实的聊天对象,我会将消息以`[name]:msg`的格式发送给你,请鉴别不同人的消息记录的同时,综合群聊上下文回答对方问题。用中文回答,注意只回答内容,以纯字符串形式回复,不要带任何格式。" }, Message { role: "user", content: "[女巫盲毒预言家]:oi" }]
+false
+[02-17 15:54:14] [group 249065204 女巫盲毒预言家 1335515386]: /clear
+false
+"/clear"
+[02-17 15:54:14] [reply] [to group 249065204 女巫盲毒预言家 1335515386]: [reply]重置历史消息成功
+[02-17 15:54:20] [group 249065204 女巫盲毒预言家 1335515386]: [at] 说话
+false
+"[at] 说话"
+[Message { role: "system", content: "你正在扮演一个真实的聊天对象,我会将消息以`[name]:msg`的格式发送给你,请鉴别不同人的消息记录的同时,综合群聊上下文回答对方问题。用中文回答,注意只回答内容,以纯字符串形式回复,不要带任何格式。" }, Message { role: "user", content: "[女巫盲毒预言家]:说话" }]
+[02-17 15:54:30] [group 249065204 女巫盲毒预言家 1335515386]: [at] 念词
+false
+"[at] 念词"
+[Message { role: "system", content: "你正在扮演一个真实的聊天对象,我会将消息以`[name]:msg`的格式发送给你,请鉴别不同人的消息记录的同时,综合群聊上下文回答对方问题。用中文回答,注意只回答内容,以纯字符串形式回复,不要带任何格式。" }, Message { role: "user", content: "[女巫盲毒预言家]:说话" }, Message { role: "user", content: "[女巫盲毒预言家]:念词" }]
+Failed to get a successful response: 504 Gateway Timeout
+[02-17 15:54:57] [reply] [to group 249065204 女巫盲毒预言家 1335515386]: [reply]Error: 504 Gateway Timeout
+Failed to get a successful response: 504 Gateway Timeout
+[02-17 15:55:21] [reply] [to group 249065204 女巫盲毒预言家 1335515386]: [reply]Error: 504 Gateway Timeout
+Failed to get a successful response: 504 Gateway Timeout
+[02-17 15:55:30] [reply] [to group 249065204 女巫盲毒预言家 1335515386]: [reply]Error: 504 Gateway Timeout
+[02-17 16:00:55] [group 249065204 女巫盲毒预言家 1335515386]: [at] oi
+false
+"[at] oi"
+[Message { role: "system", content: "你正在扮演一个真实的聊天对象,我会将消息以`[name]:msg`的格式发送给你,请鉴别不同人的消息记录的同时,综合群聊上下文回答对方问题。用中文回答,注意只回答内容,以纯字符串形式回复,不要带任何格式。" }, Message { role: "user", content: "[女巫盲毒预言家]:说话" }, Message { role: "user", content: "[女巫盲毒预言家]:念词" }, Message { role: "user", content: "[女巫盲毒预言家]:oi" }]
+Response: {"id":"019512ecac0fe61caceb8a380d8a4a27","object":"chat.completion","created":1739779255,"model":"deepseek-ai/DeepSeek-V3","choices":[{"index":0,"message":{"role":"assistant","content":"ojbk"},"finish_reason":"stop"}],"usage":{"prompt_tokens":185,"completion_tokens":2,"total_tokens":187},"system_fingerprint":""}
+[02-17 16:01:18] [reply] [to group 249065204 女巫盲毒预言家 1335515386]: [reply][at]ojbk
+[02-17 16:01:25] [group 249065204 女巫盲毒预言家 1335515386]: ？
+false
+"？"
+[02-17 16:01:32] [group 249065204 女巫盲毒预言家 1335515386]: [at] 你这么牛逼吗
+false
+"[at] 你这么牛逼吗"
+[Message { role: "system", content: "你正在扮演一个真实的聊天对象,我会将消息以`[name]:msg`的格式发送给你,请鉴别不同人的消息记录的同时,综合群聊上下文回答对方问题。用中文回答,注意只回答内容,以纯字符串形式回复,不要带任何格式。" }, Message { role: "user", content: "[女巫盲毒预言家]:说话" }, Message { role: "user", content: "[女巫盲毒预言家]:念词" }, Message { role: "user", content: "[女巫盲毒预言家]:oi" }, Message { role: "assistant", content: "ojbk" }, Message { role: "user", content: "[女巫盲毒预言家]:你这么牛逼吗" }]
+[02-17 16:01:42] [group 249065204 女巫盲毒预言家 1335515386]: 我擦
+false
+"我擦"
+[02-17 16:01:49] [group 249065204 女巫盲毒预言家 1335515386]: 这ai这么牛逼
+false
+"这ai这么牛逼"
+[02-17 16:01:56] [group 249065204 女巫盲毒预言家 1335515386]: ojbk都出来了
+"ojbk都出来了"
+false
+Failed to get a successful response: 504 Gateway Timeout
+[02-17 16:02:33] [reply] [to group 249065204 女巫盲毒预言家 1335515386]: [reply]Error: 504 Gateway Timeout
+[02-17 16:13:15] [group 852296265 ill 027° 1300711994]: [image]
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:13:19] [group 852296265 ill 027° 1300711994]: 一个人就是一个团队
+false
+"一个人就是一个团队"
+[02-17 16:13:21] [group 852296265 ill 027° 1300711994]: [face]
+"[face]"
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:14:49] [group 852296265 言起四和 1695509455]: 6
+false
+"6"
+[02-17 16:14:49] [group 852296265 ill 027° 1300711994]: 啊？艾妮没了
+"啊？艾妮没了"
+false
+[02-17 16:14:54] [group 852296265 ill 027° 1300711994]: 我还没去过呢
+false
+"我还没去过呢"
+[02-17 16:14:54] [group 852296265 言起四和 1695509455]: 啊
+false
+"啊"
+[02-17 16:15:46] [group 852296265 言起四和 1695509455]: 我看b站还有
+false
+"我看b站还有"
+[02-17 16:16:16] [group 852296265 ill 027° 1300711994]: [image]
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:16:43] [group 852296265 帅道无上大宗师 1456281569]: ？？
+false
+"？？"
+[02-17 16:16:47] [group 852296265 帅道无上大宗师 1456281569]: 😭😭😭
+"😭😭😭"
+false
+[02-17 16:16:53] [group 852296265 帅道无上大宗师 1456281569]: 怎么御三家都没了
+"怎么御三家都没了"
+false
+[02-17 16:16:57] [group 852296265 帅道无上大宗师 1456281569]: 漫展确实不挣钱
+"漫展确实不挣钱"
+false
+[02-17 16:17:49] [group 852296265 言起四和 1695509455]: 主要是艾妮每次都跟cgf一起
+false
+"主要是艾妮每次都跟cgf一起"
+[02-17 16:18:43] [group 852296265 言起四和 1695509455]: 梦乡就举办次数多多了
+"梦乡就举办次数多多了"
+false
+[02-17 16:19:11] [group 852296265 女巫盲毒预言家 1335515386]: [reply][at] 什么御三家
+false
+"[reply][at] 什么御三家"
+[02-17 16:20:10] [group 852296265 帅道无上大宗师 1456281569]: 艾妮，cgf和梦乡
+"艾妮，cgf和梦乡"
+false
+[02-17 16:20:38] [group 852296265 帅道无上大宗师 1456281569]: 不对
+false
+"不对"
+[02-17 16:20:43] [group 852296265 帅道无上大宗师 1456281569]: 这是运营团队吧（）
+"这是运营团队吧（）"
+false
+[02-17 16:21:03] [group 852296265 帅道无上大宗师 1456281569]: 看错了
+"看错了"
+false
+[02-17 16:22:05] [group 852296265 女巫盲毒预言家 1335515386]: [reply][at] cgf跟梦乡也没了？
+false
+"[reply][at] cgf跟梦乡也没了？"
+[02-17 16:22:37] [group 852296265 玄愔Wukii 2904327315]: 应该只有艾妮没了吧（？
+"应该只有艾妮没了吧（？"
+false
+[02-17 16:22:53] [group 852296265 ⁣ 2857165918]: [reply][at] 怎么把自己手机号盒了（
+"[reply][at] 怎么把自己手机号盒了（"
+false
+[02-17 16:23:05] [group 852296265 兔友凸(^▽^)凸 1911877264]: 艾妮还没去过呢
+false
+"艾妮还没去过呢"
+[02-17 16:23:28] [group 852296265 ill 027° 1300711994]: 难不成群u会拿去刷单吗
+false
+"难不成群u会拿去刷单吗"
+[02-17 16:24:07] [group 852296265 女巫盲毒预言家 1335515386]: 再来个银行卡，身份证
+"再来个银行卡，身份证"
+false
+[02-17 16:24:11] [group 852296265 玄愔Wukii 2904327315]: 给你发短信疯狂星期四文案
+"给你发短信疯狂星期四文案"
+false
+[02-17 16:24:18] [group 852296265 女巫盲毒预言家 1335515386]: 明天账户多出几十万啊
+false
+"明天账户多出几十万啊"
+[02-17 16:24:21] [group 852296265 帅道无上大宗师 1456281569]: 这个到底是运营团队
+false
+"这个到底是运营团队"
+[02-17 16:24:21] [group 852296265 帅道无上大宗师 1456281569]: 没了
+"没了"
+false
+[02-17 16:24:29] [group 852296265 帅道无上大宗师 1456281569]: 还是艾妮整个项目都没了
+"还是艾妮整个项目都没了"
+false
+[02-17 16:25:01] [group 852296265 ⁣ 2857165918]: [reply][at] 哈哈哈哈哈
+false
+"[reply][at] 哈哈哈哈哈"
+[02-17 16:26:25] [group 852296265 帅道无上大宗师 1456281569]: 15w的倍数
+"15w的倍数"
+false
+[02-17 16:26:29] [group 852296265 帅道无上大宗师 1456281569]: 把你手机给我（）
+"把你手机给我（）"
+false
+[02-17 16:26:56] [group 852296265 小高 2633451061]: 升舱的钱我来出！
+"升舱的钱我来出！"
+false
+[02-17 16:30:42] [group 852296265 ⁣ 2857165918]: [reply][at] 所以啥情况？
+false
+"[reply][at] 所以啥情况？"
+[02-17 16:31:15] [group 852296265 帅道无上大宗师 1456281569]: 不知道哇，这上面写的只是运营团队没了，在我印象中运营团队应该只是项目组的一部分吧
+false
+"不知道哇，这上面写的只是运营团队没了，在我印象中运营团队应该只是项目组的一部分吧"
+[02-17 16:32:23] [group 852296265 玄愔Wukii 2904327315]: 我不知道
+"我不知道"
+false
+[02-17 16:32:33] [group 852296265 玄愔Wukii 2904327315]: [image]
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:32:36] [group 852296265 玄愔Wukii 2904327315]: 应该还能办吧
+"应该还能办吧"
+false
+[02-17 16:33:01] [group 852296265 玄愔Wukii 2904327315]: 他说有会新的小伙伴接手
+"他说有会新的小伙伴接手"
+false
+[02-17 16:33:03] [group 852296265 南屏 2209043915]: 艾尼21年不是全国爆雷了吗
+false
+"艾尼21年不是全国爆雷了吗"
+[02-17 16:33:13] [group 852296265 南屏 2209043915]: 21年后重建的
+false
+"21年后重建的"
+[02-17 16:33:22] [group 852296265 帅道无上大宗师 1456281569]: 咱们群也没有去艾妮的（）
+false
+"咱们群也没有去艾妮的（）"
+[02-17 16:33:31] [group 852296265 南屏 2209043915]: 艾尼主办其实是场馆方好像
+"艾尼主办其实是场馆方好像"
+false
+[02-17 16:33:33] [group 852296265 加糖但不甜 852964247]: 有的兄弟有的
+false
+"有的兄弟有的"
+[02-17 16:33:36] [group 852296265 加糖但不甜 852964247]: 我之前去过
+"我之前去过"
+false
+[02-17 16:33:46] [group 852296265 加糖但不甜 852964247]: 艾妮主办就是国博
+false
+"艾妮主办就是国博"
+[02-17 16:33:50] [group 852296265 加糖但不甜 852964247]: [image]
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:33:50] [group 852296265 南屏 2209043915]: 看啥时候找到新运营团队了
+"看啥时候找到新运营团队了"
+false
+[02-17 16:34:05] [group 852296265 加糖但不甜 852964247]: CGF主办就是光科
+"CGF主办就是光科"
+false
+[02-17 16:34:07] [group 852296265 帅道无上大宗师 1456281569]: 什么时候举办witacg漫展
+false
+"什么时候举办witacg漫展"
+[02-17 16:34:12] [group 852296265 加糖但不甜 852964247]: 这两个是场地办的
+false
+"这两个是场地办的"
+[02-17 16:34:29] [group 852296265 加糖但不甜 852964247]: 但是光科看起来场地好，变成后起之秀了
+false
+"但是光科看起来场地好，变成后起之秀了"
+[02-17 16:34:32] [group 852296265 加糖但不甜 852964247]: [image]
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:34:55] [group 852296265 帅道无上大宗师 1456281569]: 我觉得cgf规划挺好的
+"我觉得cgf规划挺好的"
+false
+[02-17 16:34:59] [group 852296265 帅道无上大宗师 1456281569]: 梦乡到处都有
+"梦乡到处都有"
+false
+[02-17 16:35:05] [group 852296265 帅道无上大宗师 1456281569]: cgf只有武汉
+"cgf只有武汉"
+false
+[02-17 16:35:17] [group 852296265 加糖但不甜 852964247]: 还有北京
+"还有北京"
+false
+[02-17 16:35:21] [group 852296265 加糖但不甜 852964247]: [image]
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:35:22] [group 852296265 帅道无上大宗师 1456281569]: 有吗
+"有吗"
+false
+[02-17 16:35:26] [group 852296265 帅道无上大宗师 1456281569]: 我都不知道
+false
+"我都不知道"
+[02-17 16:35:26] [group 852296265 加糖但不甜 852964247]: 是的
+"是的"
+false
+[02-17 16:35:32] [group 852296265 加糖但不甜 852964247]: 元旦就是跑去北京了
+"元旦就是跑去北京了"
+false
+[02-17 16:35:36] [group 852296265 加糖但不甜 852964247]: [image]
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:35:39] [group 852296265 帅道无上大宗师 1456281569]: 好像是的来着
+false
+"好像是的来着"
+[02-17 16:35:43] [group 852296265 加糖但不甜 852964247]: 梦乡我知道西安重庆
+false
+"梦乡我知道西安重庆"
+[02-17 16:52:35] [group 852296265 ⁣ 2857165918]: 唉，漫展
+"唉，漫展"
+false
+[02-17 16:52:50] [group 852296265 ⁣ 2857165918]: 我妈问我漫展是啥我都不知道该怎么解释
+false
+"我妈问我漫展是啥我都不知道该怎么解释"
+[02-17 16:53:18] [group 852296265 ⁣ 2857165918]: 只能解释为穿着动画片里人物的衣服去拍照
+false
+"只能解释为穿着动画片里人物的衣服去拍照"
+[02-17 16:53:27] [group 852296265 玉米须须 2145269313]: 我妈每次都把漫展叫漫画展
+"我妈每次都把漫展叫漫画展"
+false
+[02-17 16:53:32] [group 662595138 一些Alter 784601411]: [image]
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:54:17] [group 852296265 南屏 2209043915]: 国内漫展其实是算有点走偏了
+"国内漫展其实是算有点走偏了"
+false
+[02-17 16:54:28] [group 852296265 南屏 2209043915]: 原本漫展其实是
+"原本漫展其实是"
+false
+[02-17 16:55:22] [group 852296265 南屏 2209043915]: 二次元同好们拿着自己做的二次元周边（二创），去漫展互相交流（交换，售卖）
+false
+"二次元同好们拿着自己做的二次元周边（二创），去漫展互相交流（交换，售卖）"
+[02-17 16:55:48] [group 852296265 南屏 2209043915]: cosplay也算是一种二创
+false
+"cosplay也算是一种二创"
+[02-17 16:55:59] [group 852296265 南屏 2209043915]: 但是一开始占的部分并不大
+"但是一开始占的部分并不大"
+false
+[02-17 16:56:20] [group 852296265 南屏 2209043915]: 但是其他的部分也没有大肆宣传的地方
+"但是其他的部分也没有大肆宣传的地方"
+false
+[02-17 16:56:34] [group 852296265 南屏 2209043915]: 反倒是cosplay很能吸引眼球
+false
+"反倒是cosplay很能吸引眼球"
+[02-17 16:56:40] [group 852296265 ⁣ 2857165918]: 害
+"害"
+false
+[02-17 16:56:54] [group 852296265 南屏 2209043915]: 所以很多漫展做推广的时候就用了大部分cos画面
+"所以很多漫展做推广的时候就用了大部分cos画面"
+false
+[02-17 16:57:07] [group 852296265 南屏 2209043915]: 然后刚接触的人就先入为主了
+false
+"然后刚接触的人就先入为主了"
+[02-17 16:57:23] [group 852296265 南屏 2209043915]: 传到国内就变成了，以cosplay为主的活动了
+false
+"传到国内就变成了，以cosplay为主的活动了"
+[02-17 16:57:47] [group 852296265 帅道无上大宗师 1456281569]: 漫展以前好多小h书和盗版周边（
+"漫展以前好多小h书和盗版周边（"
+false
+[02-17 16:57:55] [group 852296265 南屏 2209043915]: 是这样
+"是这样"
+false
+[02-17 16:58:04] [group 852296265 ⁣ 2857165918]: 是这样
+false
+"是这样"
+[02-17 16:58:06] [group 852296265 サターン_Saturn 3241656241]: 是这样
+"是这样"
+false
+[02-17 16:58:09] [group 852296265 ⁣ 2857165918]: 我初中同学就买过
+"我初中同学就买过"
+false
+[02-17 16:58:20] [group 852296265 帅道无上大宗师 1456281569]: 我买的盗版周边
+"我买的盗版周边"
+false
+[02-17 16:58:21] [group 852296265 帅道无上大宗师 1456281569]: [face]
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+"[face]"
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:58:30] [group 852296265 帅道无上大宗师 1456281569]: 小黄书，当时还小，根本不敢买
+"小黄书，当时还小，根本不敢买"
+false
+[02-17 16:58:31] [group 852296265 铭熙 2488558572]: [image]
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:58:57] [group 852296265 南屏 2209043915]: [reply][at] 我一看你就是偷偷摸摸买好几本的那种人
+false
+"[reply][at] 我一看你就是偷偷摸摸买好几本的那种人"
+[02-17 16:59:01] [group 852296265 南屏 2209043915]: [image]
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 16:59:07] [group 852296265 帅道无上大宗师 1456281569]: [image]
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 17:00:13] [group 852296265 サターン_Saturn 3241656241]: 我记得我第一次去漫展就看到过很多小h书和那种很大的纸袋，里面装着周边的那种，外面印着各种ip
+false
+"我记得我第一次去漫展就看到过很多小h书和那种很大的纸袋，里面装着周边的那种，外面印着各种ip"
+[02-17 17:00:18] [group 852296265 サターン_Saturn 3241656241]: [image]
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 17:00:53] [group 852296265 帅道无上大宗师 1456281569]: 以前花50买了盗版庄周的鲲，然后回来发现网上只要二十人都麻了
+"以前花50买了盗版庄周的鲲，然后回来发现网上只要二十人都麻了"
+false
+[02-17 17:00:55] [group 852296265 ill 027° 1300711994]: 谁是秦始皇
+"谁是秦始皇"
+false
+[02-17 17:02:13] [group 852296265 帅道无上大宗师 1456281569]: 嬴政
+"嬴政"
+false
+[02-17 17:02:37] [group 852296265 ill 027° 1300711994]: 不是
+"不是"
+false
+[02-17 17:02:53] [group 852296265 ill 027° 1300711994]: [image]
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+[02-17 17:03:02] [group 852296265 言起四和 1695509455]: 哈哈哈哈哈哈哈哈哈哈哈哈哈
+"哈哈哈哈哈哈哈哈哈哈哈哈哈"
+false
+[02-17 17:03:07] [group 852296265 帅道无上大宗师 1456281569]: 哈哈哈哈哈哈哈哈哈
+"哈哈哈哈哈哈哈哈哈"
+false
+[02-17 17:03:09] [group 852296265 玉米须须 2145269313]: 哈哈哈哈哈哈哈哈哈
+"哈哈哈哈哈哈哈哈哈"
+false
+[02-17 17:03:13] [group 852296265 サターン_Saturn 3241656241]: 哈哈哈哈哈哈哈哈哈
+"哈哈哈哈哈哈哈哈哈"
+false
+[02-17 17:03:36] [group 852296265 铭熙 2488558572]: 哈哈哈哈哈哈哈哈哈
+"哈哈哈哈哈哈哈哈哈"
+false
+[02-17 17:03:46] [group 852296265 Tindalos·Fenrir 253367182]: 哈哈哈哈哈哈哈哈哈
+false
+"哈哈哈哈哈哈哈哈哈"
+[02-17 17:03:49] [group 852296265 某洪(一直想睡觉版) 2656174110]: 哈哈哈哈哈哈哈哈哈
+false
+"哈哈哈哈哈哈哈哈哈"
+[02-17 17:04:18] [group 852296265 サターン_Saturn 3241656241]: [image]
+"[image]"
+
+thread 'tokio-runtime-worker' panicked at plugins/taro/src/lib.rs:200:18:
+called `Option::unwrap()` on a `None` value
+
+thread 'tokio-runtime-worker' panicked at plugins/deepseek/src/lib.rs:188:18:
+called `Option::unwrap()` on a `None` value
+[02-17 17:04:23] [group 852296265 サターン_Saturn 3241656241]: 我给我朋友发过这个（）
+"我给我朋友发过这个（）"
+false
+[02-17 17:04:30] [group 852296265 言起四和 1695509455]: [reply][at] 我刚要给他发
+"[reply][at] 我刚要给他发"
+false
+[02-17 17:04:37] [group 852296265 言起四和 1695509455]: 算了
+"算了"
+false
+[02-17 17:04:38] [group 852296265 Tindalos·Fenrir 253367182]: MAGA都来了
+"MAGA都来了"
+false
+[02-17 17:06:35] [group 249065204 女巫盲毒预言家 1335515386]: /clear
+"/clear"
+[02-17 17:06:35] [reply] [to group 249065204 女巫盲毒预言家 1335515386]: [reply]重置历史消息成功
+false
+[02-17 17:07:29] [group 249065204 女巫盲毒预言家 1335515386]: /clear
+"/clear"
+false
+[02-17 17:07:29] [reply] [to group 249065204 女巫盲毒预言家 1335515386]: [reply]重置历史消息成功
+[02-17 17:07:55] [group 249065204 女巫盲毒预言家 1335515386]: /clear
+false
+"/clear"
+[02-17 17:07:55] [reply] [to group 249065204 女巫盲毒预言家 1335515386]: [reply]重置历史消息成功

@@ -1,0 +1,10 @@
+[config]
+main_admin = 3939271104
+admins = []
+debug = false
+
+[server]
+host = "127.0.0.1"
+port = 3001
+access_token = "61acij970ed"
+secure = false
