@@ -1,17 +1,17 @@
-[deepseek]
-enable_on_startup = true
-access_control = false
-list_mode = "WhiteList"
-
-[deepseek.access_list]
-friends = []
-groups = []
-
 [taro]
 enable_on_startup = true
 access_control = false
 list_mode = "WhiteList"
 
 [taro.access_list]
+friends = []
+groups = []
+
+[deepseek]
+enable_on_startup = true
+access_control = false
+list_mode = "WhiteList"
+
+[deepseek.access_list]
 friends = []
 groups = []
