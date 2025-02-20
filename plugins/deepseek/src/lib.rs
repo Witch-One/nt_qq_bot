@@ -20,6 +20,24 @@ struct ChatCompletionResponse {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
+struct ToolCalls {
+    id: String,
+    r#type: String,
+    function: FunctionCalls,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct FunctionCalls {
+    name: String,
+    arguments: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct SearchKnowledgeBaseArguments {
+    query: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
 struct Choice {
     index: u32,
     message: Message,
@@ -30,6 +48,13 @@ struct Choice {
 struct Message {
     role: String,
     content: String,
+    tool_calls: Option<Vec<ToolCalls>>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct MessageWithoutToolCalls {
+    role: String,
+    content: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -37,6 +62,21 @@ struct Usage {
     prompt_tokens: u32,
     completion_tokens: u32,
     total_tokens: u32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct SearchResponse {
+    conversation_id: String,
+    messages: Vec<SearchResponseMessage>,
+    code: i64,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct SearchResponseMessage {
+    role: String,
+    r#type: String,
+    content_type: String,
+    content: String,
 }
 
 fn remove_prefix_if_starts_with(input: &str, prefix: &str) -> Option<String> {
@@ -65,30 +105,83 @@ async fn main() {
     let prompt_list: Arc<Mutex<Vec<Message>>> = Arc::new(Mutex::new(vec![Message {
         content: "你正在扮演一个真实的聊天对象,我会将消息以`[name]:msg`的格式发送给你,请鉴别不同人的消息记录的同时,综合群聊上下文回答对方问题。用中文回答,注意只回答内容,以纯字符串形式回复,不要带任何格式。".to_string(),
         role: "system".to_string(),
+        tool_calls:None,
     }]));
 
-    // async  fn search_knowledge_base(query: String) -> null {
+    async fn search_knowledge_base(
+        client: Client,
+        api_url: String,
+        api_key: String,
+        history_messages: Arc<Mutex<Vec<Message>>>,
+        prompt_list: Arc<Mutex<Vec<Message>>>,
+        query: String,
+    ) -> String {
+        let serch_url = "https://api.bochaai.com/v1/ai-search";
+        let client_clone = client.clone();
+        let search_api_key = "sk-a2dc9a18f74746328e8d2cce927a2bec";
+        let request_body = json!({
+            "query": &query,
+            "freshness": "noLimit",
+            "count": 10,
+            "answer": false,
+            "stream": false
+        });
 
-    //     let serch_url = "https://api.bochaai.com/v1/ai-search";
-    //     let client_clone = client.clone();
+        let response = client
+            .post(serch_url)
+            .header("Content-Type", "application/json")
+            .header("Accept", "*/*")
+            .header("Connection", "keep-alive ")
+            .header("Authorization", format!("Bearer {}", search_api_key))
+            .json(&request_body)
+            .send()
+            .await;
 
-    //     let request_body = json!({
-    //         "query": &query,
-    //         "freshness": "noLimit",
-    //         "count": 10,
-    //         "answer": false,
-    //         "stream": false
-    //     });
+        match response {
+            Ok(response) => {
+                if response.status().is_success() {
+                    let response_text = response
+                        .text()
+                        .await
+                        .unwrap_or_else(|_| "Failed to read response".to_string());
+                    println!("Response: {}", response_text);
+                    let response_json: SearchResponse =
+                        serde_json::from_str(&response_text).unwrap();
 
-    //     let response = client_clone
-    //     .post(serch_url)
-    //     .header("Content-Type", "application/json")
-    //     .header("Accept", "application/json")
-    //     .header("Authorization", format!("Bearer {}", api_key_clone))
-    //     .json(&request_body)
-    //     .send()
-    //     .await;
-    // }
+                    let mut search_list: Vec<Message> = vec![];
+
+                    for msg in response_json.messages.into_iter() {
+                        search_list.push(Message {
+                            content: msg.content,
+                            role: "assistant".to_string(),
+                            tool_calls: None,
+                        })
+                    }
+
+                    println!("search_list :{:?}", search_list);
+                    // 使用 Box::pin 包装递归调用
+                    let chat_res = Box::pin(chat_with_gpt(
+                        client,
+                        api_url,
+                        api_key,
+                        history_messages,
+                        prompt_list,
+                        search_list,
+                        false,
+                    ))
+                    .await;
+                    return chat_res;
+                } else {
+                    eprintln!("Failed to get a successful response: {:?}", response);
+                    return format!("Error: {:?}", response);
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to send request: {:?}", e);
+                return format!("Error: {:?}", e);
+            }
+        }
+    }
 
     async fn chat_with_gpt(
         client: Client,
@@ -123,49 +216,77 @@ async fn main() {
                 .into_iter()
                 .chain(history_messages_clone.into_iter())
                 .collect();
+            let combined: Vec<MessageWithoutToolCalls> = combined
+                .into_iter()
+                .map(|item| MessageWithoutToolCalls {
+                    content: item.content.clone(),
+                    role: item.role.clone(),
+                })
+                .collect();
             println!("{:?}", combined);
-            json!({
-                "messages": combined,
-                "model": "deepseek-ai/DeepSeek-V3",
-                "frequency_penalty": 0,
-                "max_tokens": 2048,
-                "response_format": {
-                    "type": "text"
-                },
-                "stop": null,
-                "stream": false,
-                "stream_options": null,
-                "temperature": 1.1,
-                "top_p": 1,
-                "n": 1,
-                "tools":[{
-                    "type": "function",
-                    "function": {
-                        "name": "search_knowledge_base",
-                        "description": "查询知识库以检索关于某个主题的相关信息。",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "query": {
-                                    "type": "string",
-                                    "description": "用户的问题中需要搜索查询的问题。"
+
+            if !should_add_to_history {
+                json!({
+                    "messages": combined,
+                    "model": "Pro/deepseek-ai/DeepSeek-R1",
+                    "frequency_penalty": 0,
+                    "max_tokens": 10000,
+                    "response_format": {
+                        "type": "text"
+                    },
+                    "stop": null,
+                    "stream": false,
+                    "stream_options": null,
+                    "temperature": 1.1,
+                    "top_p": 1,
+                    "n": 1,
+                })
+            }else {
+                json!({
+                    "messages": combined,
+                    "model": "deepseek-ai/DeepSeek-V3",
+                    "frequency_penalty": 0,
+                    "max_tokens": 2048,
+                    "response_format": {
+                        "type": "text"
+                    },
+                    "stop": null,
+                    "stream": false,
+                    "stream_options": null,
+                    "temperature": 1.1,
+                    "top_p": 1,
+                    "n": 1,
+                    "tools":[{
+                        "type": "function",
+                        "function": {
+                            "name": "search_knowledge_base",
+                            "description": "联网搜索用户提出的相关问题。",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "query": {
+                                        "type": "string",
+                                        "description": "用户的问题中需要搜索查询的问题。"
+                                    },
                                 },
+                                "required": [
+                                    "query"
+                                ]
                             },
-                            "required": [
-                                "query"
-                            ]
-                        },
-                        "strict": true
-                    }
-                }],
-            })
+                            "strict": true
+                        }
+                    }],
+                })
+            }
+           
         };
         // 发送 POST 请求
+
         let response = client
-            .post(api_key)
+            .post(api_url.clone())
             .header("Content-Type", "application/json")
             .header("Accept", "application/json")
-            .header("Authorization", format!("Bearer {}", api_key))
+            .header("Authorization", format!("Bearer {}", &api_key))
             .json(&request_body)
             .send()
             .await;
@@ -177,28 +298,45 @@ async fn main() {
                         .await
                         .unwrap_or_else(|_| "Failed to read response".to_string());
                     println!("Response: {}", response_text);
-                    let response: ChatCompletionResponse =
+                    let response_json: ChatCompletionResponse =
                         serde_json::from_str(&response_text).unwrap();
-
-                    // if Some(tool_calls) =response.get("tool_calls") let response_prompt = {
-                    //      for  tool in tool_calls.into_iter() {
-                    //         if tool.
-                    //      }
-                    // };
+                    let first_msg = response_json.choices[0].message.clone();
+                    println!("First Choice{:?}", first_msg);
+                    if first_msg.tool_calls.is_some() {
+                        let tool_calls = first_msg.tool_calls.unwrap();
+                        for tool in tool_calls.into_iter() {
+                            println!("{:?}", tool);
+                            if tool.function.name == "search_knowledge_base" {
+                                let arguments: SearchKnowledgeBaseArguments =
+                                    serde_json::from_str(&tool.function.arguments).unwrap();
+                                let serach_res = search_knowledge_base(
+                                    client,
+                                    api_url.clone(),
+                                    api_key.clone(),
+                                    history_messages,
+                                    prompt_list,
+                                    arguments.query.to_string(),
+                                )
+                                .await;
+                                println!("serach_res:{}", serach_res);
+                                return serach_res;
+                            }
+                        }
+                    };
                     {
                         let mut history_messages = history_messages.lock().await;
-                        history_messages.push(response.choices[0].message.clone());
+                        history_messages.push(response_json.choices[0].message.clone());
                     };
 
-                    return response.choices[0].message.content.to_string();
+                    return response_json.choices[0].message.content.to_string();
                 } else {
-                    eprintln!("Failed to get a successful response: {}", response.status());
-                    return format!("Error: {:?}", response.status());
+                    eprintln!("Failed to get a successful response: {:?}", response);
+                    return format!("Error: {:?}", response);
                 }
             }
             Err(e) => {
                 eprintln!("Failed to send request: {:?}", e);
-                return format!("Error: {:?}", response.status());
+                return format!("Error: {:?}", e);
             }
         }
     }
@@ -216,16 +354,21 @@ async fn main() {
                 let list = vec![Message {
                     content: format!(
                         "[{}]:{}",
-                        &event.sender.nickname.unwrap(),
-                        &event.borrow_text().unwrap()
+                        event
+                            .sender
+                            .nickname
+                            .as_ref()
+                            .unwrap_or(&"Unknown".to_string()),
+                        event.borrow_text().unwrap().clone()
                     ),
                     role: "user".to_string(),
+                    tool_calls: None,
                 }];
 
                 let res = chat_with_gpt(
                     client_clone,
-                    api_key_clone,
                     api_url_clone,
+                    api_key_clone,
                     prompt_list_clone,
                     history_messages_clone,
                     list,
@@ -238,6 +381,7 @@ async fn main() {
                         .add_at(&event.sender.user_id.to_string().as_str())
                         .add_text(&res),
                 );
+                return;
             }
             if event
                 .borrow_text()
@@ -252,6 +396,7 @@ async fn main() {
                         prompt_list.push(Message {
                             content: prompt,
                             role: "system".to_string(),
+                            tool_calls: None,
                         });
                     }
                     None => {

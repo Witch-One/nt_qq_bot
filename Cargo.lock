@@ -797,13 +797,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 
 [[package]]
-name = "hi"
-version = "0.1.0"
-dependencies = [
- "kovi",
-]
-
-[[package]]
 name = "html5ever"
 version = "0.29.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1354,7 +1347,6 @@ dependencies = [
  "base",
  "base64 0.13.1",
  "deepseek",
- "hi",
  "kovi",
  "kovi-plugin-shindan-maker",
  "rand 0.9.0",
