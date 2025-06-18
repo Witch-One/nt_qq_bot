@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::error::Error;
 use std::sync::Arc;
+use std::env;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 struct ChatCompletionResponse {
@@ -60,7 +61,8 @@ fn remove_prefix_if_starts_with(input: &str, prefix: &str) -> Option<String> {
 #[kovi::plugin]
 async fn main() {
     // 设置 API 密钥
-    let api_key = "sk-kghllfzjpsjfwysmetklfsfnlmzjchewwcnfxbknhtdfqcjj";
+    let api_key = env::var("SILICON_FLOW_API_KEY").unwrap_or_default();
+    println!("{}",api_key);
     let api_url = "https://api.siliconflow.cn/v1/chat/completions";
 
     let tarot_cards = vec![

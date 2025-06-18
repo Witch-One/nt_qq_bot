@@ -1,13 +1,15 @@
 use kovi::Message as KoviMessage;
 use kovi::PluginBuilder as plugin;
 use kovi::tokio;
-use kovi::tokio::sync::Mutex; // 使用 tokio 的 Mutex
+use kovi::tokio::sync::Mutex;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::error::Error;
 use std::sync::Arc;
+use std::env;
 
+// 数据结构定义
 #[derive(Debug, Deserialize, Serialize, Clone)]
 struct ChatCompletionResponse {
     id: String,
@@ -66,59 +68,96 @@ struct Usage {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 struct SearchResponse {
-    conversation_id: String,
     messages: Vec<SearchResponseMessage>,
-    code: i64,
+    summary: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 struct SearchResponseMessage {
-    role: String,
-    r#type: String,
-    content_type: String,
+    url: String,
+    title: String,
     content: String,
+    icon: String,
 }
 
-fn remove_prefix_if_starts_with(input: &str, prefix: &str) -> Option<String> {
-    // 判断 input 是否以 prefix 开头
-    if input.starts_with(prefix) {
-        // 删除 prefix 后的字符串
-        input.strip_prefix(prefix).map(|s| s.to_string())
-    } else {
-        // 如果不以 prefix 开头，返回 None
-        None
+// 配置结构体
+#[derive(Clone)]
+struct DeepSeekConfig {
+    api_key: String,
+    api_url: String,
+    search_api_key: String,
+    search_url: String,
+}
+
+impl DeepSeekConfig {
+    fn new() -> Self {
+        Self {
+            api_key: env::var("DEEPSEEK_API_KEY").unwrap_or_default(),
+            api_url: "https://api.deepseek.com/chat/completions".to_string(),
+            search_api_key: env::var("BO_CHA_API_KEY").unwrap_or_default(),
+            search_url: "https://api.bochaai.com/v1/ai-search".to_string(),
+        }
     }
 }
 
-#[kovi::plugin]
-async fn main() {
-    // 设置 API 密钥
-    let api_key = "sk-kghllfzjpsjfwysmetklfsfnlmzjchewwcnfxbknhtdfqcjj";
-    let api_url = "https://api.siliconflow.cn/v1/chat/completions";
+// 聊天历史管理器
+#[derive(Clone)]
+struct ChatHistoryManager {
+    history_messages: Arc<Mutex<Vec<Message>>>,
+    prompt_list: Arc<Mutex<Vec<Message>>>,
+}
 
-    // 创建 HTTP 客户端
-    let client = Client::new();
+impl ChatHistoryManager {
+    fn new() -> Self {
+        let system_prompt = Message {
+            content: "你正在扮演一个真实的聊天对象,我会将消息以`[name]:msg`的格式发送给你,请鉴别不同人的消息记录的同时,综合群聊上下文回答对方问题。用中文回答,注意只回答内容,以纯字符串形式回复,不要带任何格式。".to_string(),
+            role: "system".to_string(),
+            tool_calls: None,
+        };
 
-    // 使用 Arc<Mutex<Vec<Message>>> 来共享和同步状态
-    let history_messages: Arc<Mutex<Vec<Message>>> = Arc::new(Mutex::new(vec![]));
+        Self {
+            history_messages: Arc::new(Mutex::new(vec![])),
+            prompt_list: Arc::new(Mutex::new(vec![system_prompt])),
+        }
+    }
 
-    let prompt_list: Arc<Mutex<Vec<Message>>> = Arc::new(Mutex::new(vec![Message {
-        content: "你正在扮演一个真实的聊天对象,我会将消息以`[name]:msg`的格式发送给你,请鉴别不同人的消息记录的同时,综合群聊上下文回答对方问题。用中文回答,注意只回答内容,以纯字符串形式回复,不要带任何格式。".to_string(),
-        role: "system".to_string(),
-        tool_calls:None,
-    }]));
+    async fn add_message(&self, message: Message) {
+        let mut history = self.history_messages.lock().await;
+        history.push(message);
+    }
 
-    async fn search_knowledge_base(
-        client: Client,
-        api_url: String,
-        api_key: String,
-        history_messages: Arc<Mutex<Vec<Message>>>,
-        prompt_list: Arc<Mutex<Vec<Message>>>,
-        query: String,
-    ) -> String {
-        let serch_url = "https://api.bochaai.com/v1/ai-search";
-        let client_clone = client.clone();
-        let search_api_key = "sk-a2dc9a18f74746328e8d2cce927a2bec";
+    async fn get_combined_messages(&self, additional_messages: Vec<Message>) -> Vec<MessageWithoutToolCalls> {
+        let prompt_list = self.prompt_list.lock().await.clone();
+        let history_messages = self.history_messages.lock().await.clone();
+        
+        let combined: Vec<Message> = prompt_list
+            .into_iter()
+            .chain(history_messages.into_iter())
+            .chain(additional_messages.into_iter())
+            .collect();
+
+        combined
+            .into_iter()
+            .map(|item| MessageWithoutToolCalls {
+                content: item.content,
+                role: item.role,
+            })
+            .collect()
+    }
+}
+
+// 知识库搜索服务
+struct KnowledgeBaseSearcher {
+    client: Client,
+    config: DeepSeekConfig,
+}
+
+impl KnowledgeBaseSearcher {
+    fn new(client: Client, config: DeepSeekConfig) -> Self {
+        Self { client, config }
+    }
+
+    async fn search(&self, query: String) -> Result<String, Box<dyn Error + Send + Sync>> {
         let request_body = json!({
             "query": &query,
             "freshness": "noLimit",
@@ -127,295 +166,216 @@ async fn main() {
             "stream": false
         });
 
-        let response = client
-            .post(serch_url)
+        let response = self.client
+            .post(&self.config.search_url)
             .header("Content-Type", "application/json")
             .header("Accept", "*/*")
-            .header("Connection", "keep-alive ")
-            .header("Authorization", format!("Bearer {}", search_api_key))
+            .header("Connection", "keep-alive")
+            .header("Authorization", format!("Bearer {}", self.config.search_api_key))
             .json(&request_body)
             .send()
-            .await;
+            .await?;
 
-        match response {
-            Ok(response) => {
-                if response.status().is_success() {
-                    let response_text = response
-                        .text()
-                        .await
-                        .unwrap_or_else(|_| "Failed to read response".to_string());
-                    println!("Response: {}", response_text);
-                    let response_json: SearchResponse =
-                        serde_json::from_str(&response_text).unwrap();
+        if response.status().is_success() {
+            let response_text = response.text().await?;
+            let response_json: SearchResponse = serde_json::from_str(&response_text)?;
+            
+            let formatted_results = response_json.messages
+                .iter()
+                .map(|msg| format!("标题: {}\n内容: {}\n来源: {}\n", msg.title, msg.content, msg.url))
+                .collect::<Vec<String>>()
+                .join("\n---\n");
 
-                    let mut search_list: Vec<Message> = vec![];
+            Ok(format!("搜索结果:\n{}", formatted_results))
+        } else {
+            Err(format!("搜索请求失败: {:?}", response.status()).into())
+        }
+    }
+}
 
-                    for msg in response_json.messages.into_iter() {
-                        search_list.push(Message {
-                            content: msg.content,
-                            role: "assistant".to_string(),
-                            tool_calls: None,
-                        })
-                    }
+// DeepSeek AI 服务
+struct DeepSeekService {
+    client: Client,
+    config: DeepSeekConfig,
+    history_manager: ChatHistoryManager,
+    knowledge_searcher: KnowledgeBaseSearcher,
+}
 
-                    println!("search_list :{:?}", search_list);
-                    // 使用 Box::pin 包装递归调用
-                    let chat_res = Box::pin(chat_with_gpt(
-                        client,
-                        api_url,
-                        api_key,
-                        history_messages,
-                        prompt_list,
-                        search_list,
-                        false,
-                    ))
-                    .await;
-                    return chat_res;
-                } else {
-                    eprintln!("Failed to get a successful response: {:?}", response);
-                    return format!("Error: {:?}", response);
-                }
-            }
-            Err(e) => {
-                eprintln!("Failed to send request: {:?}", e);
-                return format!("Error: {:?}", e);
-            }
+impl DeepSeekService {
+    fn new() -> Self {
+        let client = Client::new();
+        let config = DeepSeekConfig::new();
+        let history_manager = ChatHistoryManager::new();
+        let knowledge_searcher = KnowledgeBaseSearcher::new(client.clone(), config.clone());
+
+        Self {
+            client,
+            config,
+            history_manager,
+            knowledge_searcher,
         }
     }
 
-    async fn chat_with_gpt(
-        client: Client,
-        api_url: String,
-        api_key: String,
-        history_messages: Arc<Mutex<Vec<Message>>>,
-        prompt_list: Arc<Mutex<Vec<Message>>>,
-        list: Vec<Message>,
-        should_add_to_history: bool,
-    ) -> String {
-        // 构建请求体
-        let request_body = {
-            let mut history_messages = history_messages.lock().await; // 使用 .await 获取锁
-            // 克隆历史消息到局部变量
-            let history_messages_clone = {
-                if should_add_to_history {
-                    for msg in list.into_iter() {
-                        history_messages.push(msg.clone());
-                    }
-                    history_messages.clone()
-                } else {
-                    let mut history_messages_clone = history_messages.clone();
-                    for msg in list.into_iter() {
-                        history_messages_clone.push(msg.clone());
-                    }
-                    history_messages_clone
-                }
-            };
-
-            let prompt_list = prompt_list.lock().await.clone();
-            let combined: Vec<Message> = prompt_list
-                .into_iter()
-                .chain(history_messages_clone.into_iter())
-                .collect();
-            let combined: Vec<MessageWithoutToolCalls> = combined
-                .into_iter()
-                .map(|item| MessageWithoutToolCalls {
-                    content: item.content.clone(),
-                    role: item.role.clone(),
-                })
-                .collect();
-            println!("{:?}", combined);
-
-            if !should_add_to_history {
-                json!({
-                    "messages": combined,
-                    "model": "Pro/deepseek-ai/DeepSeek-R1",
-                    "frequency_penalty": 0,
-                    "max_tokens": 10000,
-                    "response_format": {
-                        "type": "text"
-                    },
-                    "stop": null,
-                    "stream": false,
-                    "stream_options": null,
-                    "temperature": 1.1,
-                    "top_p": 1,
-                    "n": 1,
-                })
-            }else {
-                json!({
-                    "messages": combined,
-                    "model": "deepseek-ai/DeepSeek-V3",
-                    "frequency_penalty": 0,
-                    "max_tokens": 2048,
-                    "response_format": {
-                        "type": "text"
-                    },
-                    "stop": null,
-                    "stream": false,
-                    "stream_options": null,
-                    "temperature": 1.1,
-                    "top_p": 1,
-                    "n": 1,
-                    "tools":[{
-                        "type": "function",
-                        "function": {
-                            "name": "search_knowledge_base",
-                            "description": "联网搜索用户提出的相关问题。",
-                            "parameters": {
-                                "type": "object",
-                                "properties": {
-                                    "query": {
-                                        "type": "string",
-                                        "description": "用户的问题中需要搜索查询的问题。"
-                                    },
-                                },
-                                "required": [
-                                    "query"
-                                ]
-                            },
-                            "strict": true
-                        }
-                    }],
-                })
-            }
-           
+    async fn chat(&self, messages: Vec<Message>, enable_tools: bool) -> String {
+        let combined_messages = if enable_tools {
+            self.history_manager.get_combined_messages(messages.clone()).await
+        } else {
+            self.history_manager.get_combined_messages(messages.clone()).await
         };
-        // 发送 POST 请求
 
-        let response = client
-            .post(api_url.clone())
-            .header("Content-Type", "application/json")
-            .header("Accept", "application/json")
-            .header("Authorization", format!("Bearer {}", &api_key))
-            .json(&request_body)
-            .send()
-            .await;
-        match response {
-            Ok(response) => {
-                if response.status().is_success() {
-                    let response_text = response
-                        .text()
-                        .await
-                        .unwrap_or_else(|_| "Failed to read response".to_string());
-                    println!("Response: {}", response_text);
-                    let response_json: ChatCompletionResponse =
-                        serde_json::from_str(&response_text).unwrap();
-                    let first_msg = response_json.choices[0].message.clone();
-                    println!("First Choice{:?}", first_msg);
-                    if first_msg.tool_calls.is_some() {
-                        let tool_calls = first_msg.tool_calls.unwrap();
-                        for tool in tool_calls.into_iter() {
-                            println!("{:?}", tool);
-                            if tool.function.name == "search_knowledge_base" {
-                                let arguments: SearchKnowledgeBaseArguments =
-                                    serde_json::from_str(&tool.function.arguments).unwrap();
-                                let serach_res = search_knowledge_base(
-                                    client,
-                                    api_url.clone(),
-                                    api_key.clone(),
-                                    history_messages,
-                                    prompt_list,
-                                    arguments.query.to_string(),
-                                )
-                                .await;
-                                println!("serach_res:{}", serach_res);
-                                return serach_res;
+        let request_body = self.build_request_body(&combined_messages, enable_tools);
+
+        match self.send_chat_request(&request_body).await {
+            Ok(response_text) => {
+                if let Ok(response_json) = serde_json::from_str::<ChatCompletionResponse>(&response_text) {
+                    if let Some(choice) = response_json.choices.first() {
+                        // 处理工具调用
+                        if let Some(tool_calls) = &choice.message.tool_calls {
+                            return self.handle_tool_calls(tool_calls, messages).await;
+                        }
+                        
+                        // 添加到历史记录
+                        if enable_tools {
+                            for msg in messages {
+                                self.history_manager.add_message(msg).await;
                             }
                         }
-                    };
-                    {
-                        let mut history_messages = history_messages.lock().await;
-                        history_messages.push(response_json.choices[0].message.clone());
-                    };
-
-                    return response_json.choices[0].message.content.to_string();
+                        
+                        choice.message.content.clone()
+                    } else {
+                        "未收到有效回复".to_string()
+                    }
                 } else {
-                    eprintln!("Failed to get a successful response: {:?}", response);
-                    return format!("Error: {:?}", response);
+                    format!("解析响应失败: {}", response_text)
                 }
             }
-            Err(e) => {
-                eprintln!("Failed to send request: {:?}", e);
-                return format!("Error: {:?}", e);
-            }
+            Err(e) => format!("请求失败: {:?}", e)
         }
     }
 
-    plugin::on_msg(move |event| {
-        let client_clone = client.clone();
-        let api_url_clone = api_url.to_string();
-        let api_key_clone = api_key.to_string();
-        let history_messages_clone = Arc::clone(&history_messages);
-        let prompt_list_clone = Arc::clone(&prompt_list);
+    async fn send_chat_request(&self, request_body: &serde_json::Value) -> Result<String, Box<dyn Error + Send + Sync>> {
+        let response = self.client
+            .post(&self.config.api_url)
+            .header("Content-Type", "application/json")
+            .header("Authorization", format!("Bearer {}", self.config.api_key))
+            .json(request_body)
+            .send()
+            .await?;
 
-        println!("{:?}", event.message.to_human_string());
-        async move {
-            if event.raw_message.contains("[CQ:at,qq=3939271104]") {
-                let list = vec![Message {
-                    content: format!(
-                        "[{}]:{}",
-                        event
-                            .sender
-                            .nickname
-                            .as_ref()
-                            .unwrap_or(&"Unknown".to_string()),
-                        event.borrow_text().unwrap().clone()
-                    ),
-                    role: "user".to_string(),
-                    tool_calls: None,
-                }];
+        let response_text = response.text().await?;
+        Ok(response_text)
+    }
 
-                let res = chat_with_gpt(
-                    client_clone,
-                    api_url_clone,
-                    api_key_clone,
-                    prompt_list_clone,
-                    history_messages_clone,
-                    list,
-                    true,
-                )
-                .await;
-                event.reply(
-                    KoviMessage::new()
-                        .add_reply(event.message_id)
-                        .add_at(&event.sender.user_id.to_string().as_str())
-                        .add_text(&res),
-                );
-                return;
-            }
-            if event
-                .borrow_text()
-                .unwrap()
-                .to_string()
-                .starts_with("/system")
-                && event.sender.user_id == 1335515386
-            {
-                let mut prompt_list = prompt_list_clone.lock().await;
-                match remove_prefix_if_starts_with(event.borrow_text().unwrap(), "/system") {
-                    Some(prompt) => {
-                        prompt_list.push(Message {
-                            content: prompt,
-                            role: "system".to_string(),
-                            tool_calls: None,
-                        });
-                    }
-                    None => {
-                        event.reply_and_quote("Error: 请以\"/system\"开头以添加prompt");
+    fn build_request_body(&self, messages: &[MessageWithoutToolCalls], enable_tools: bool) -> serde_json::Value {
+        let mut request = json!({
+            "messages": messages,
+            "model": "deepseek-chat",
+            "frequency_penalty": 0,
+            "response_format": { "type": "text" },
+            "stop": null,
+            "stream": false,
+            "stream_options": null,
+            "top_p": 1,
+            "n": 1,
+        });
+
+        if enable_tools {
+            request["max_tokens"] = json!(2048);
+            request["temperature"] = json!(1.1);
+            request["tools"] = json!([{
+                "type": "function",
+                "function": {
+                    "name": "search_knowledge_base",
+                    "description": "联网搜索用户提出的相关问题。",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "query": {
+                                "type": "string",
+                                "description": "用户的问题中需要搜索查询的问题。"
+                            }
+                        },
+                        "required": ["query"]
+                    },
+                    "strict": true
+                }
+            }]);
+        } else {
+            request["max_tokens"] = json!(8000);
+            request["temperature"] = json!(0.7);
+        }
+
+        request
+    }
+
+    async fn handle_tool_calls(&self, tool_calls: &[ToolCalls], original_messages: Vec<Message>) -> String {
+        for tool_call in tool_calls {
+            if tool_call.function.name == "search_knowledge_base" {
+                if let Ok(args) = serde_json::from_str::<SearchKnowledgeBaseArguments>(&tool_call.function.arguments) {
+                    match self.knowledge_searcher.search(args.query).await {
+                        Ok(search_results) => {
+                            let search_message = Message {
+                                role: "user".to_string(),
+                                content: search_results,
+                                tool_calls: None,
+                            };
+                            
+                            return Box::pin(self.chat(vec![search_message], false)).await;
+                        }
+                        Err(e) => return format!("搜索失败: {:?}", e),
                     }
                 }
             }
-            if event
-                .borrow_text()
-                .unwrap()
-                .to_string()
-                .starts_with("/clear")
-                && event.sender.user_id == 1335515386
-            {
-                let mut history_messages = history_messages_clone.lock().await;
-                history_messages.clear();
-                let mut prompt_list = prompt_list_clone.lock().await;
-                prompt_list.truncate(1);
-                event.reply_and_quote("重置历史消息成功");
+        }
+        "工具调用处理失败".to_string()
+    }
+}
+
+// 工具函数
+fn remove_prefix_if_starts_with(input: &str, prefix: &str) -> Option<String> {
+    if input.starts_with(prefix) {
+        Some(input[prefix.len()..].to_string())
+    } else {
+        None
+    }
+}
+
+#[kovi::plugin]
+async fn main() {
+    let deepseek_service = Arc::new(DeepSeekService::new());
+
+    plugin::on_msg(move |event| {
+        let deepseek_service = deepseek_service.clone();
+        async move {
+            if let Some(plain_text) = event.borrow_text() {
+                // 处理 AI 对话请求
+                if let Some(content) = remove_prefix_if_starts_with(&plain_text, "ai ") {
+                    let user_message = Message {
+                        role: "user".to_string(),
+                        content: format!("[{}]: {}", 
+                            event.sender.nickname.as_ref().unwrap_or(&"Unknown".to_string()), 
+                            content
+                        ),
+                        tool_calls: None,
+                    };
+
+                    let response = deepseek_service.chat(vec![user_message], true).await;
+                    event.reply_and_quote(&response);
+                }
+                // 处理简单对话请求
+                else if let Some(content) = remove_prefix_if_starts_with(&plain_text, "chat ") {
+                    let user_message = Message {
+                        role: "user".to_string(),
+                        content: format!("[{}]: {}", 
+                            event.sender.nickname.as_ref().unwrap_or(&"Unknown".to_string()), 
+                            content
+                        ),
+                        tool_calls: None,
+                    };
+
+                    let response = deepseek_service.chat(vec![user_message], false).await;
+                    event.reply_and_quote(&response);
+                }
             }
         }
     });

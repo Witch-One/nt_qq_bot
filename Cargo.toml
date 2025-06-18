@@ -13,9 +13,10 @@ deepseek = { version = "0.1.0", path = "plugins/deepseek" }
 taro = { version = "0.1.0", path = "plugins/taro" }
 kovi-plugin-shindan-maker = "0.1.7"
 rand = "0.9.0"
+history-book = { version = "0.1.0", path = "plugins/history-book" }
 
 [workspace]
-members = [ "plugins/base", "plugins/deepseek", "plugins/taro"]
+members = [ "plugins/base", "plugins/deepseek", "plugins/history-book", "plugins/taro"]
 
 [workspace.dependencies]
 kovi = "0.11.7"
